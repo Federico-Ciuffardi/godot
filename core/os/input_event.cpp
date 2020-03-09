@@ -1128,6 +1128,73 @@ Vector2 InputEventGesture::get_position() const {
 }
 /////////////////////////////
 
+void InputEventMultiScreenDrag::set_position(const Vector2 &p_pos) {
+
+	pos = p_pos;
+}
+Vector2 InputEventMultiScreenDrag::get_position() const {
+
+	return pos;
+}
+
+void InputEventMultiScreenDrag::set_relative(const Vector2 &p_relative) {
+
+	relative = p_relative;
+}
+Vector2 InputEventMultiScreenDrag::get_relative() const {
+
+	return relative;
+}
+
+void InputEventMultiScreenDrag::set_speed(const Vector2 &p_speed) {
+
+	speed = p_speed;
+}
+Vector2 InputEventMultiScreenDrag::get_speed() const {
+
+	return speed;
+}
+
+Ref<InputEvent> InputEventMultiScreenDrag::xformed_by(const Transform2D &p_xform, const Vector2 &p_local_ofs) const {
+
+	Ref<InputEventMultiScreenDrag> sd;
+
+	sd.instance();
+
+	sd->set_device(get_device());
+
+	sd->set_position(p_xform.xform(pos + p_local_ofs));
+	sd->set_relative(p_xform.basis_xform(relative));
+	sd->set_speed(p_xform.basis_xform(speed));
+
+	return sd;
+}
+
+String InputEventMultiScreenDrag::as_text() const {
+
+	return "InputEventMultiScreenDrag : position=(" + String(get_position()) + "), relative=(" + String(get_relative()) + "), speed=(" + String(get_speed()) + ")";
+}
+
+void InputEventMultiScreenDrag::_bind_methods() {
+
+	ClassDB::bind_method(D_METHOD("set_position", "position"), &InputEventMultiScreenDrag::set_position);
+	ClassDB::bind_method(D_METHOD("get_position"), &InputEventMultiScreenDrag::get_position);
+
+	ClassDB::bind_method(D_METHOD("set_relative", "relative"), &InputEventMultiScreenDrag::set_relative);
+	ClassDB::bind_method(D_METHOD("get_relative"), &InputEventMultiScreenDrag::get_relative);
+
+	ClassDB::bind_method(D_METHOD("set_speed", "speed"), &InputEventMultiScreenDrag::set_speed);
+	ClassDB::bind_method(D_METHOD("get_speed"), &InputEventMultiScreenDrag::get_speed);
+
+	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2, "position"), "set_position", "get_position");
+	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2, "relative"), "set_relative", "get_relative");
+	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2, "speed"), "set_speed", "get_speed");
+}
+
+InputEventMultiScreenDrag::InputEventMultiScreenDrag() {
+}
+/////////////////////////////
+
 void InputEventTwistGesture::set_relative(real_t p_relative) {
 
 	relative = p_relative;
