@@ -536,6 +536,28 @@ public:
 	Vector2 get_position() const;
 };
 
+class InputEventPinchGesture : public InputEventGesture {
+
+	GDCLASS(InputEventPinchGesture, InputEventGesture);
+	real_t distance;
+	real_t relative;
+
+protected:
+	static void _bind_methods();
+
+public:
+	void set_relative(real_t p_relative);
+	real_t get_relative() const;
+
+	void set_distance(real_t p_relative);
+	real_t get_distance() const;
+
+	virtual Ref<InputEvent> xformed_by(const Transform2D &p_xform, const Vector2 &p_local_ofs = Vector2()) const;
+	virtual String as_text() const;
+
+	InputEventPinchGesture();
+};
+
 class InputEventMagnifyGesture : public InputEventGesture {
 
 	GDCLASS(InputEventMagnifyGesture, InputEventGesture);

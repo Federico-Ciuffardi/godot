@@ -364,6 +364,17 @@ void OS_Android::process_event(Ref<InputEvent> p_event) {
 	input->parse_input_event(p_event);
 }
 
+float angle_to(Point2 v1, Point2 v2) {
+	float dot = v1.x*v2.x + v1.y*v2.y;
+	float det = v1.x*v2.y - v1.y*v2.x;   
+	return atan2(det, dot);
+}
+
+float lenght(Point2 v) {
+	return sqrt(v.x*v.x + v.y*v.y);
+}
+
+
 void OS_Android::process_touch(int p_what, int p_pointer, const Vector<TouchPos> &p_points) {
 
 	switch (p_what) {
@@ -404,6 +415,10 @@ void OS_Android::process_touch(int p_what, int p_pointer, const Vector<TouchPos>
 
 			ERR_FAIL_COND(touch.size() != p_points.size());
 
+			List<Point2> positions;
+			List<Point2> relatives;
+
+
 			for (int i = 0; i < touch.size(); i++) {
 
 				int idx = -1;
@@ -420,6 +435,9 @@ void OS_Android::process_touch(int p_what, int p_pointer, const Vector<TouchPos>
 				if (touch[i].pos == p_points[idx].pos)
 					continue; //no move unncesearily
 
+				positions.push_back(p_points[idx].pos);
+				relatives.push_back(p_points[idx].pos - touch[i].pos);
+
 				Ref<InputEventScreenDrag> ev;
 				ev.instance();
 				ev->set_index(touch[i].id);
@@ -428,6 +446,51 @@ void OS_Android::process_touch(int p_what, int p_pointer, const Vector<TouchPos>
 				input->parse_input_event(ev);
 				touch.write[i].pos = p_points[idx].pos;
 			}
+			if (positions.size() > 1) {
+				// figure out gesture center
+				Point2 center = Point2();
+				for (int i = 0; i < positions.size(); i++) {
+					center += positions[i];
+				}
+				center /= positions.size();
+				// figure out gesture
+				int sector;
+				bool sector_initialized = false;
+				for (int i = 0; i < positions.size(); i++){
+					Point2 adjusted_position = center - positions[i];
+
+					float raw_angle = fmod(angle_to(adjusted_position, relatives[i])  + (M_PI/4), 2*M_PI);
+					float adjusted_angle = raw_angle >= 0 ? raw_angle : raw_angle + 2*M_PI;
+					int e_sector = floor(adjusted_angle / (M_PI/2));
+					if (!sector_initialized){
+						sector = e_sector;
+						sector_initialized = true;
+					}else if (sector != e_sector){
+						sector = -1;
+					}
+				}
+				if (sector == -1){ //MULTI_DRAG
+					//pan?
+				}else if (sector == 0 or sector == 2){ //PINCH
+					float distance_i = 0;
+					float distance_f = 0;
+					for (int i = 0; i < positions.size(); i++){
+						distance_i += lenght(positions[i] - center);
+						distance_f += lenght(positions[i] - center + (relatives[i]/positions.size()));
+					}
+					float relative = distance_f - distance_i;
+
+					Ref<InputEventPinchGesture> ev;
+					ev.instance();
+					ev->set_position(center);
+					ev->set_distance(distance_i);
+					ev->set_relative(relative);
+					input->parse_input_event(ev);
+				}else if (sector == 1 or sector == 3){ //TWIST
+
+				}
+			}
+
 
 		} break;
 		case 2: { //release
