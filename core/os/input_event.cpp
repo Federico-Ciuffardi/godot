@@ -1128,7 +1128,46 @@ Vector2 InputEventGesture::get_position() const {
 }
 /////////////////////////////
 
+void InputEventTwistGesture::set_relative(real_t p_relative) {
 
+	relative = p_relative;
+}
+
+real_t InputEventTwistGesture::get_relative() const {
+
+	return relative;
+}
+
+Ref<InputEvent> InputEventTwistGesture::xformed_by(const Transform2D &p_xform, const Vector2 &p_local_ofs) const {
+
+	Ref<InputEventTwistGesture> ev;
+	ev.instance();
+
+	ev->set_device(get_device());
+	ev->set_modifiers_from_event(this);
+
+	ev->set_position(p_xform.xform(get_position() + p_local_ofs));
+	ev->set_relative(get_relative());
+
+	return ev;
+}
+
+String InputEventTwistGesture::as_text() const {
+
+	return "InputEventTwistGesture : relative=(" + rtos(get_relative()) + ", position=(" + String(get_position()) + ")";
+}
+
+void InputEventTwistGesture::_bind_methods() {
+
+	ClassDB::bind_method(D_METHOD("set_relative", "relative"), &InputEventTwistGesture::set_relative);
+	ClassDB::bind_method(D_METHOD("get_relative"), &InputEventTwistGesture::get_relative);
+
+	ADD_PROPERTY(PropertyInfo(Variant::REAL, "relative"), "set_relative", "get_relative");
+}
+
+InputEventTwistGesture::InputEventTwistGesture() {
+}
+/////////////////////////////
 void InputEventPinchGesture::set_distance(real_t p_distance) {
 
 	distance = p_distance;

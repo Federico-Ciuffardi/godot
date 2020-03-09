@@ -536,6 +536,24 @@ public:
 	Vector2 get_position() const;
 };
 
+class InputEventTwistGesture : public InputEventGesture {
+
+	GDCLASS(InputEventTwistGesture, InputEventGesture);
+	real_t relative;
+
+protected:
+	static void _bind_methods();
+
+public:
+	void set_relative(real_t p_relative);
+	real_t get_relative() const;
+
+	virtual Ref<InputEvent> xformed_by(const Transform2D &p_xform, const Vector2 &p_local_ofs = Vector2()) const;
+	virtual String as_text() const;
+
+	InputEventTwistGesture();
+};
+
 class InputEventPinchGesture : public InputEventGesture {
 
 	GDCLASS(InputEventPinchGesture, InputEventGesture);

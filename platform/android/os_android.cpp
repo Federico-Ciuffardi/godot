@@ -470,7 +470,7 @@ void OS_Android::process_touch(int p_what, int p_pointer, const Vector<TouchPos>
 					}
 				}
 				if (sector == -1){ //MULTI_DRAG
-					//pan?
+
 				}else if (sector == 0 or sector == 2){ //PINCH
 					float distance_i = 0;
 					float distance_f = 0;
@@ -487,7 +487,17 @@ void OS_Android::process_touch(int p_what, int p_pointer, const Vector<TouchPos>
 					ev->set_relative(relative);
 					input->parse_input_event(ev);
 				}else if (sector == 1 or sector == 3){ //TWIST
+					float relative = 0;
+					for (int i = 0; i < positions.size(); i++){
+						relative += angle_to(positions[i] - center,positions[i] + (relatives[i]/positions.size()) - center);
+					}
+					relative /= positions.size();
 
+					Ref<InputEventTwistGesture> ev;
+					ev.instance();
+					ev->set_position(center);
+					ev->set_relative(relative);
+					input->parse_input_event(ev);
 				}
 			}
 
